@@ -117,11 +117,11 @@ int gh=0;
 }*/
 void draw() {
   background(80, 80, 200);
-  if((nval&3)==1)valx=-width;
-  if((nval&3)==2)valx=width;
+  if((nval&3)==1)valx=-(int)(abs(xlx))*100;
+  if((nval&3)==2)valx=(int)(abs(xlx))*100;
   if((nval&3)==0)valx=0;
-  if((nval&12)==4)valy=height;
-  if((nval&12)==8)valy=-height;
+  if((nval&12)==4)valy=(int)(abs(xly))*100;
+  if((nval&12)==8)valy=-(int)(abs(xly))*100;
   if((nval&12)==0)valy=0;
   //text("("+valx+","+valy+")",width/2,height/2);
  world.setGravity(valx,valy);
@@ -132,8 +132,11 @@ void draw() {
   world.step();
   world.draw();
 }
+float xlx,xly;
 void onAccelerometerEvent(float x, float y, float z)
 {
+  xlx=x;
+  xly=y;
   nval=0;
   if(x<-2) nval|=1;  
   else if(x>2)  nval|=2;
