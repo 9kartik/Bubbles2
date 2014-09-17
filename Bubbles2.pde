@@ -8,10 +8,14 @@
 
 import fisica.*;
 import ketai.sensors.*;
-
+import ketai.data.*;
 FWorld world;
 
 KetaiSensor sensor;
+KetaiSQLite db;
+
+String CREATE_DB_SQL = "CREATE TABLE data (x INTEGER NOT NULL);";
+
 float accelerometerX, accelerometerY, accelerometerZ;
 int valx, valy,pvalx,pvaly,nval=0;
 
@@ -21,8 +25,14 @@ float topMargin = 50;
 float bottomMargin = 300;
 float sideMargin = 100;
 float xPos = 0;
-
+int skoar=0;
+ FBlob b = new FBlob();
+ FPoly l = new FPoly();
+ FPoly r = new FPoly();
+ FPoly rx = new FPoly();
+ FPoly ry = new FPoly();
 void setup() {
+  db = new KetaiSQLite(this);
   size(displayWidth, displayHeight);
   smooth();
 
@@ -42,7 +52,7 @@ void setup() {
   
 
 
-  FPoly l = new FPoly();
+  
   l.vertex(10, 0);
   l.vertex(0, 0);
   l.vertex(0, height);
@@ -54,7 +64,7 @@ void setup() {
   l.setFriction(50);
   world.add(l);
 
-  FPoly r = new FPoly();
+  
   r.vertex(width-10, 0);
   r.vertex(width, 0);
   r.vertex(width, height);
@@ -66,7 +76,7 @@ void setup() {
   r.setFriction(50);
   world.add(r);
   
-  FPoly rx = new FPoly();
+  
   rx.vertex(10, 0);
   rx.vertex(width-10, 0);
   rx.vertex(width-10, 10);
@@ -77,7 +87,7 @@ void setup() {
   rx.setFriction(50);
   world.add(rx);
   
-  FPoly ry = new FPoly();
+  
   ry.vertex(10, height-10);
   ry.vertex(width-10, height-10);
   ry.vertex(width-10, height);
@@ -88,7 +98,7 @@ void setup() {
   ry.setFriction(50);
   world.add(ry);
   
-  FBlob b = new FBlob();
+  
     float s = random(30, 60);
     float space = (width-sideMargin*2-s);
     xPos = (xPos + random(s, space/2)) % space;
@@ -115,22 +125,47 @@ int gh=0;
     world.add(b);
 }
 }*/
+float Xx,Yy;
+
+boolean gameEnd=false;
+String shotext;
 void draw() {
-  background(80, 80, 200);
+  if(!gameEnd)background(80, 80, 200);
+  else {
+      background(255,0,0);
+      
+  }
+  f1=0;
   if((nval&3)==1)valx=-(int)(abs(xlx))*100;
   if((nval&3)==2)valx=(int)(abs(xlx))*100;
   if((nval&3)==0)valx=0;
   if((nval&12)==4)valy=(int)(abs(xly))*100;
   if((nval&12)==8)valy=-(int)(abs(xly))*100;
   if((nval&12)==0)valy=0;
-  //text("("+valx+","+valy+")",width/2,height/2);
- world.setGravity(valx,valy);
-  //if ((frameCount % 40) == 1) {
-    
-  //}
-
+  world.setGravity(valx,valy);
+  
+    if(!gameEnd){
+        shotext=""+skoar/10;
+    }
+   
   world.step();
+    text(shotext,width*0.5,10);
   world.draw();
+}
+
+void mousePressed()
+{
+  if(gameEnd) {
+    gameEnd=false;
+    skoar=0;
+  }  
+}
+int  f1=0;
+void contactStarted(FContact c)
+{
+  shotext="GameEnd";
+  //b.removeFromWorld();
+  gameEnd=true;
 }
 float xlx,xly;
 void onAccelerometerEvent(float x, float y, float z)
@@ -144,4 +179,7 @@ void onAccelerometerEvent(float x, float y, float z)
   if(y<-2) nval|=4;
   else if(y>2) nval|=8;
   else nval&=3;
+  skoar++;
+  //Xx=b.getAnchorX();
+  //Yy=b.getAnchorY();
 }
