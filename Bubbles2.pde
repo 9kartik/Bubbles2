@@ -14,7 +14,7 @@ FWorld world;
 KetaiSensor sensor;
 KetaiSQLite db;
 
-String CREATE_DB_SQL = "CREATE TABLE data (x INTEGER NOT NULL);";
+String CREATE_DB_SQL = "CREATE TABLE hi_skoar_bubbles (Skoar INTEGER);";
 
 float accelerometerX, accelerometerY, accelerometerZ;
 int valx, valy,pvalx,pvaly,nval=0;
@@ -49,9 +49,17 @@ void setup() {
   Fisica.init(this);
 
   world = new FWorld();
-  
-
-
+  //--------------------------------------------------------------
+if ( db.connect() )
+  {
+    // for initial app launch there are no tables so we make one
+    if (!db.tableExists("hi_skoar_bubbles"))
+      {
+        db.execute(CREATE_DB_SQL);
+        print("creating table");
+      }
+  }
+  //-----------------------------------------------------------------
   
   l.vertex(10, 0);
   l.vertex(0, 0);
@@ -127,13 +135,20 @@ int gh=0;
 }*/
 float Xx,Yy;
 
-boolean gameEnd=false;
+boolean gameEnd=false,hx=true;
 String shotext;
 void draw() {
   if(!gameEnd)background(80, 80, 200);
   else {
       background(255,0,0);
-      
+      if (db.connect() && hx)
+    {   
+    if (!db.execute("INSERT into hi_skoar_bubbles (`Skore`) VALUES ('"+skoar/10+"')"))
+      println("Failed to record data!" );
+      db.query( "SELECT * FROM hi_skoar_bubbles" );
+      shotext="Hi Skore :"+Integer.parseInt(db.getFieldMax("hi_skoar_bubbles","Skore"));
+      hx=false;
+    }
   }
   f1=0;
   if((nval&3)==1)valx=-(int)(abs(xlx))*100;
@@ -156,6 +171,7 @@ void draw() {
 void mousePressed()
 {
   if(gameEnd) {
+    hx=true;
     gameEnd=false;
     skoar=0;
   }  
@@ -165,6 +181,7 @@ void contactStarted(FContact c)
 {
   shotext="GameEnd";
   //b.removeFromWorld();
+  
   gameEnd=true;
 }
 float xlx,xly;
